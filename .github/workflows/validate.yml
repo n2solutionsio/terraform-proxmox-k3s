@@ -1,0 +1,18 @@
+name: Validate
+on:
+  pull_request:
+  push:
+    branches: [main]
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: opentofu/setup-opentofu@v1
+      - run: tofu fmt -check -recursive
+      - run: tofu init -backend=false
+      - run: tofu validate
+      - uses: terraform-linters/setup-tflint@v4
+      - run: tflint --init
+      - run: tflint -f compact
+      - run: tofu test
