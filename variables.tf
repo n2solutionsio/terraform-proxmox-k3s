@@ -158,3 +158,9 @@ variable "dns_servers" {
   type        = list(string)
   default     = []
 }
+
+variable "disable_components" {
+  description = "List of k3s components to disable (e.g., servicelb, traefik)"
+  type        = list(string)
+  default     = []
+}

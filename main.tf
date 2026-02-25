@@ -22,11 +22,12 @@ resource "proxmox_virtual_environment_file" "cloud_init_server" {
 
   source_raw {
     data = templatefile("${path.module}/templates/k3s-server.yaml.tftpl", {
-      k3s_version     = var.k3s_version
-      k3s_token       = var.k3s_token
-      cloud_init_user = var.cloud_init_user
-      ssh_keys        = var.ssh_keys
-      hostname        = "${var.cluster_name}-cp-${count.index}"
+      k3s_version        = var.k3s_version
+      k3s_token          = var.k3s_token
+      cloud_init_user    = var.cloud_init_user
+      ssh_keys           = var.ssh_keys
+      hostname           = "${var.cluster_name}-cp-${count.index}"
+      disable_components = var.disable_components
     })
     file_name = "${var.cluster_name}-k3s-server-${count.index}.yaml"
   }

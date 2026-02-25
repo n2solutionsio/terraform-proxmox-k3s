@@ -10,4 +10,4 @@ users:
 %{ endfor ~}
 package_update: true
 runcmd:
-  - curl -sfL https://get.k3s.io | INSTALL_K3S_VERSION="${k3s_version}" K3S_TOKEN="${k3s_token}" sh -s - server --cluster-init --node-name ${hostname}
+  - curl -sfL https://get.k3s.io | INSTALL_K3S_VERSION="${k3s_version}" K3S_TOKEN="${k3s_token}" sh -s - server --cluster-init --node-name ${hostname}%{ for c in disable_components } --disable ${c}%{ endfor }
