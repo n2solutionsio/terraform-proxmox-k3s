@@ -118,3 +118,43 @@ variable "snippet_storage" {
   type        = string
   default     = "local"
 }
+
+variable "cloud_image_url" {
+  description = "URL for the cloud image to download"
+  type        = string
+  default     = "https://cloud-images.ubuntu.com/releases/24.04/release/ubuntu-24.04-server-cloudimg-amd64.img"
+}
+
+variable "cloud_image_storage" {
+  description = "Proxmox storage for the cloud image download"
+  type        = string
+  default     = "local"
+}
+
+variable "cloud_image_file_name" {
+  description = "File name for the downloaded cloud image (must end in .qcow2 for import)"
+  type        = string
+  default     = "ubuntu-24.04-server-cloudimg-amd64.qcow2"
+}
+
+variable "network_cidr" {
+  description = "CIDR block for the cluster network (e.g., 10.30.30.0/24)"
+  type        = string
+}
+
+variable "ip_offset" {
+  description = "Starting host number for IP assignment (e.g., 10 means first VM gets .10)"
+  type        = number
+  default     = 10
+}
+
+variable "gateway" {
+  description = "Default gateway for VMs"
+  type        = string
+}
+
+variable "dns_servers" {
+  description = "DNS servers for VMs"
+  type        = list(string)
+  default     = []
+}

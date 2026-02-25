@@ -1,3 +1,18 @@
+locals {
+  network_prefix    = split("/", var.network_cidr)[1]
+  control_plane_ips = [for i in range(var.control_plane_count) : cidrhost(var.network_cidr, var.ip_offset + i)]
+  worker_ips        = [for i in range(var.worker_count) : cidrhost(var.network_cidr, var.ip_offset + var.control_plane_count + i)]
+  primary_cp_ip     = local.control_plane_ips[0]
+}
+
+resource "proxmox_virtual_environment_download_file" "cloud_image" {
+  content_type = "import"
+  datastore_id = var.cloud_image_storage
+  node_name    = var.node_name
+  url          = var.cloud_image_url
+  file_name    = var.cloud_image_file_name
+}
+
 resource "proxmox_virtual_environment_file" "cloud_init_server" {
   content_type = "snippets"
   datastore_id = var.snippet_storage
@@ -21,14 +36,14 @@ resource "proxmox_virtual_environment_file" "cloud_init_agent" {
     data = templatefile("${path.module}/templates/k3s-agent.yaml.tftpl", {
       k3s_version    = var.k3s_version
       k3s_token      = var.k3s_token
-      server_address = "$${server_address}"
+      server_address = local.primary_cp_ip
     })
     file_name = "${var.cluster_name}-k3s-agent.yaml"
   }
 }
 
 module "control_plane" {
-  source = "git::https://github.com/n2solutionsio/terraform-proxmox-vm.git?ref=v0.1.0"
+  source = "git::https://github.com/n2solutionsio/terraform-proxmox-vm.git?ref=v0.2.0"
   count  = var.control_plane_count
 
   node_name      = var.node_name
@@ -37,6 +52,7 @@ module "control_plane" {
   memory         = var.control_plane_memory
   disk_size      = var.control_plane_disk_size
   disk_storage   = var.disk_storage
+  import_from    = proxmox_virtual_environment_download_file.cloud_image.id
   vlan_id        = var.vlan_id
   network_bridge = var.network_bridge
 
@@ -44,10 +60,13 @@ module "control_plane" {
   cloud_init_user              = var.cloud_init_user
   cloud_init_ssh_keys          = var.ssh_keys
   cloud_init_user_data_file_id = proxmox_virtual_environment_file.cloud_init_server.id
+  cloud_init_ip                = "${local.control_plane_ips[count.index]}/${local.network_prefix}"
+  cloud_init_gateway           = var.gateway
+  cloud_init_dns               = var.dns_servers
 }
 
 module "workers" {
-  source = "git::https://github.com/n2solutionsio/terraform-proxmox-vm.git?ref=v0.1.0"
+  source = "git::https://github.com/n2solutionsio/terraform-proxmox-vm.git?ref=v0.2.0"
   count  = var.worker_count
 
   node_name      = var.node_name
@@ -56,6 +75,7 @@ module "workers" {
   memory         = var.worker_memory
   disk_size      = var.worker_disk_size
   disk_storage   = var.disk_storage
+  import_from    = proxmox_virtual_environment_download_file.cloud_image.id
   vlan_id        = var.vlan_id
   network_bridge = var.network_bridge
 
@@ -63,6 +83,9 @@ module "workers" {
   cloud_init_user              = var.cloud_init_user
   cloud_init_ssh_keys          = var.ssh_keys
   cloud_init_user_data_file_id = proxmox_virtual_environment_file.cloud_init_agent.id
+  cloud_init_ip                = "${local.worker_ips[count.index]}/${local.network_prefix}"
+  cloud_init_gateway           = var.gateway
+  cloud_init_dns               = var.dns_servers
 
   depends_on = [module.control_plane]
 }
