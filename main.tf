@@ -15,35 +15,39 @@ resource "proxmox_virtual_environment_download_file" "cloud_image" {
 }
 
 resource "proxmox_virtual_environment_file" "cloud_init_server" {
+  count        = var.control_plane_count
   content_type = "snippets"
   datastore_id = var.snippet_storage
   node_name    = var.node_name
 
   source_raw {
     data = templatefile("${path.module}/templates/k3s-server.yaml.tftpl", {
-      k3s_version    = var.k3s_version
-      k3s_token      = var.k3s_token
+      k3s_version     = var.k3s_version
+      k3s_token       = var.k3s_token
       cloud_init_user = var.cloud_init_user
-      ssh_keys       = var.ssh_keys
+      ssh_keys        = var.ssh_keys
+      hostname        = "${var.cluster_name}-cp-${count.index}"
     })
-    file_name = "${var.cluster_name}-k3s-server.yaml"
+    file_name = "${var.cluster_name}-k3s-server-${count.index}.yaml"
   }
 }
 
 resource "proxmox_virtual_environment_file" "cloud_init_agent" {
+  count        = var.worker_count
   content_type = "snippets"
   datastore_id = var.snippet_storage
   node_name    = var.node_name
 
   source_raw {
     data = templatefile("${path.module}/templates/k3s-agent.yaml.tftpl", {
-      k3s_version    = var.k3s_version
-      k3s_token      = var.k3s_token
-      server_address = local.primary_cp_ip
+      k3s_version     = var.k3s_version
+      k3s_token       = var.k3s_token
+      server_address  = local.primary_cp_ip
       cloud_init_user = var.cloud_init_user
-      ssh_keys       = var.ssh_keys
+      ssh_keys        = var.ssh_keys
+      hostname        = "${var.cluster_name}-worker-${count.index}"
     })
-    file_name = "${var.cluster_name}-k3s-agent.yaml"
+    file_name = "${var.cluster_name}-k3s-agent-${count.index}.yaml"
   }
 }
 
@@ -64,7 +68,7 @@ module "control_plane" {
   cloud_init_enabled           = true
   cloud_init_user              = var.cloud_init_user
   cloud_init_ssh_keys          = var.ssh_keys
-  cloud_init_user_data_file_id = proxmox_virtual_environment_file.cloud_init_server.id
+  cloud_init_user_data_file_id = proxmox_virtual_environment_file.cloud_init_server[count.index].id
   cloud_init_ip                = "${local.control_plane_ips[count.index]}/${local.network_prefix}"
   cloud_init_gateway           = var.gateway
   cloud_init_dns               = var.dns_servers
@@ -87,7 +91,7 @@ module "workers" {
   cloud_init_enabled           = true
   cloud_init_user              = var.cloud_init_user
   cloud_init_ssh_keys          = var.ssh_keys
-  cloud_init_user_data_file_id = proxmox_virtual_environment_file.cloud_init_agent.id
+  cloud_init_user_data_file_id = proxmox_virtual_environment_file.cloud_init_agent[count.index].id
   cloud_init_ip                = "${local.worker_ips[count.index]}/${local.network_prefix}"
   cloud_init_gateway           = var.gateway
   cloud_init_dns               = var.dns_servers
