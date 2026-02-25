@@ -1,3 +1,12 @@
 #cloud-config
+users:
+  - name: ${cloud_init_user}
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    shell: /bin/bash
+    ssh_authorized_keys:
+%{ for key in ssh_keys ~}
+      - ${key}
+%{ endfor ~}
+package_update: true
 runcmd:
   - curl -sfL https://get.k3s.io | INSTALL_K3S_VERSION="${k3s_version}" K3S_TOKEN="${k3s_token}" K3S_URL="https://${server_address}:6443" sh -s - agent
