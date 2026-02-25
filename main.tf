@@ -6,11 +6,12 @@ locals {
 }
 
 resource "proxmox_virtual_environment_download_file" "cloud_image" {
-  content_type = "import"
-  datastore_id = var.cloud_image_storage
-  node_name    = var.node_name
-  url          = var.cloud_image_url
-  file_name    = var.cloud_image_file_name
+  content_type        = "import"
+  datastore_id        = var.cloud_image_storage
+  node_name           = var.node_name
+  url                 = var.cloud_image_url
+  file_name           = var.cloud_image_file_name
+  overwrite_unmanaged = true
 }
 
 resource "proxmox_virtual_environment_file" "cloud_init_server" {
