@@ -66,6 +66,12 @@ variable "worker_disk_size" {
   default     = 50
 }
 
+variable "cpu_type" {
+  description = "CPU type for all cluster VMs (e.g., host, x86-64-v2-AES)"
+  type        = string
+  default     = "host"
+}
+
 variable "disk_storage" {
   description = "Storage pool for VM disks"
   type        = string

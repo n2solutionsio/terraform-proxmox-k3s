@@ -53,12 +53,13 @@ resource "proxmox_virtual_environment_file" "cloud_init_agent" {
 }
 
 module "control_plane" {
-  source = "git::https://github.com/n2solutionsio/terraform-proxmox-vm.git?ref=v0.2.0"
+  source = "git::https://github.com/n2solutionsio/terraform-proxmox-vm.git?ref=v0.3.0"
   count  = var.control_plane_count
 
   node_name      = var.node_name
   vm_name        = "${var.cluster_name}-cp-${count.index}"
   cpu_cores      = var.control_plane_cpu
+  cpu_type       = var.cpu_type
   memory         = var.control_plane_memory
   disk_size      = var.control_plane_disk_size
   disk_storage   = var.disk_storage
@@ -76,12 +77,13 @@ module "control_plane" {
 }
 
 module "workers" {
-  source = "git::https://github.com/n2solutionsio/terraform-proxmox-vm.git?ref=v0.2.0"
+  source = "git::https://github.com/n2solutionsio/terraform-proxmox-vm.git?ref=v0.3.0"
   count  = var.worker_count
 
   node_name      = var.node_name
   vm_name        = "${var.cluster_name}-worker-${count.index}"
   cpu_cores      = var.worker_cpu
+  cpu_type       = var.cpu_type
   memory         = var.worker_memory
   disk_size      = var.worker_disk_size
   disk_storage   = var.disk_storage
