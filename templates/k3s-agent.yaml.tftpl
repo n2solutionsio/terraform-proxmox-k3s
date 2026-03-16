@@ -9,5 +9,32 @@ users:
       - ${key}
 %{ endfor ~}
 package_update: true
+%{ if length(extra_packages) > 0 ~}
+packages:
+%{ for pkg in extra_packages ~}
+  - ${pkg}
+%{ endfor ~}
+%{ endif ~}
+%{ if length(agent_files) > 0 || agent_config_yaml != "" ~}
+write_files:
+%{ if agent_config_yaml != "" ~}
+  - path: /etc/rancher/k3s/config.yaml
+    owner: root:root
+    permissions: "0640"
+    content: |
+${indent(6, agent_config_yaml)}
+%{ endif ~}
+%{ for path, content in agent_files ~}
+  - path: ${path}
+    owner: root:root
+    permissions: "0640"
+    content: |
+${indent(6, content)}
+%{ endfor ~}
+%{ endif ~}
 runcmd:
-  - curl -sfL https://get.k3s.io | INSTALL_K3S_VERSION="${k3s_version}" K3S_TOKEN="${k3s_token}" K3S_URL="https://${server_address}:6443" sh -s - agent --node-name ${hostname}
+%{ for cmd in pre_k3s_commands ~}
+  - ${cmd}
+%{ endfor ~}
+  - mkdir -p /etc/rancher/k3s
+  - curl -sfL https://get.k3s.io | INSTALL_K3S_VERSION="${k3s_version}" K3S_TOKEN="${k3s_token}" K3S_URL="https://${server_address}:6443" sh -s - agent --node-name ${hostname}%{ for arg in extra_agent_args } ${arg}%{ endfor }

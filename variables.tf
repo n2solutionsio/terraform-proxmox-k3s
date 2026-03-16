@@ -170,3 +170,63 @@ variable "disable_components" {
   type        = list(string)
   default     = []
 }
+
+variable "extra_server_args" {
+  description = "Additional arguments for k3s server install (e.g., --flannel-backend=none)"
+  type        = list(string)
+  default     = []
+}
+
+variable "extra_agent_args" {
+  description = "Additional arguments for k3s agent install"
+  type        = list(string)
+  default     = []
+}
+
+variable "server_config_yaml" {
+  description = "Content for /etc/rancher/k3s/config.yaml on server nodes (written before k3s install)"
+  type        = string
+  default     = ""
+}
+
+variable "agent_config_yaml" {
+  description = "Content for /etc/rancher/k3s/config.yaml on agent nodes (written before k3s install)"
+  type        = string
+  default     = ""
+}
+
+variable "pre_k3s_commands" {
+  description = "Shell commands to run before k3s install (e.g., sysctl tuning)"
+  type        = list(string)
+  default     = []
+}
+
+variable "post_k3s_commands" {
+  description = "Shell commands to run after k3s install (e.g., Helm install Cilium)"
+  type        = list(string)
+  default     = []
+}
+
+variable "extra_packages" {
+  description = "Additional apt packages to install (e.g., nfs-common)"
+  type        = list(string)
+  default     = []
+}
+
+variable "server_files" {
+  description = "Map of file path to content, written to server nodes before k3s install"
+  type        = map(string)
+  default     = {}
+}
+
+variable "agent_files" {
+  description = "Map of file path to content, written to agent nodes before k3s install"
+  type        = map(string)
+  default     = {}
+}
+
+variable "server_taints" {
+  description = "List of taints to apply to server nodes (e.g., node-role.kubernetes.io/control-plane:NoSchedule)"
+  type        = list(string)
+  default     = []
+}
