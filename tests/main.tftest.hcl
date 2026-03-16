@@ -1,6 +1,13 @@
 mock_provider "proxmox" {}
 
 override_resource {
+  target = proxmox_virtual_environment_download_file.cloud_image
+  values = {
+    id = "local:import/ubuntu-24.04-server-cloudimg-amd64.qcow2"
+  }
+}
+
+override_resource {
   target = proxmox_virtual_environment_file.cloud_init_server
   values = {
     id = "local:snippets/test-k3s-k3s-server.yaml"
