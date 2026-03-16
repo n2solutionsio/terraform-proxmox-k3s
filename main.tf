@@ -48,17 +48,17 @@ resource "proxmox_virtual_environment_file" "cloud_init_agent" {
 
   source_raw {
     data = templatefile("${path.module}/templates/k3s-agent.yaml.tftpl", {
-      k3s_version      = var.k3s_version
-      k3s_token        = var.k3s_token
-      server_address   = local.primary_cp_ip
-      cloud_init_user  = var.cloud_init_user
-      ssh_keys         = var.ssh_keys
-      hostname         = "${var.cluster_name}-worker-${count.index}"
-      extra_agent_args = var.extra_agent_args
+      k3s_version       = var.k3s_version
+      k3s_token         = var.k3s_token
+      server_address    = local.primary_cp_ip
+      cloud_init_user   = var.cloud_init_user
+      ssh_keys          = var.ssh_keys
+      hostname          = "${var.cluster_name}-worker-${count.index}"
+      extra_agent_args  = var.extra_agent_args
       agent_config_yaml = var.agent_config_yaml
-      pre_k3s_commands = var.pre_k3s_commands
-      extra_packages   = var.extra_packages
-      agent_files      = var.agent_files
+      pre_k3s_commands  = var.pre_k3s_commands
+      extra_packages    = var.extra_packages
+      agent_files       = var.agent_files
     })
     file_name = "${var.cluster_name}-k3s-agent-${count.index}.yaml"
   }
