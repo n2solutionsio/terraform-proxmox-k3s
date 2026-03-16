@@ -22,14 +22,14 @@ write_files:
     owner: root:root
     permissions: "0640"
     content: |
-${indent(6, server_config_yaml)}
+      ${indent(6, server_config_yaml)}
 %{ endif ~}
 %{ for path, content in server_files ~}
   - path: ${path}
     owner: root:root
     permissions: "0640"
     content: |
-${indent(6, content)}
+      ${indent(6, content)}
 %{ endfor ~}
 %{ endif ~}
 runcmd:
