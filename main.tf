@@ -65,7 +65,7 @@ resource "proxmox_virtual_environment_file" "cloud_init_agent" {
 }
 
 module "control_plane" {
-  source = "git::https://github.com/n2solutionsio/terraform-proxmox-vm.git?ref=v0.3.0"
+  source = "git::https://github.com/n2solutionsio/terraform-proxmox-vm.git?ref=v0.4.0"
   count  = var.control_plane_count
 
   node_name      = var.node_name
@@ -79,6 +79,8 @@ module "control_plane" {
   vlan_id        = var.vlan_id
   network_bridge = var.network_bridge
 
+  qemu_agent_enabled = var.qemu_agent_enabled
+
   cloud_init_enabled           = true
   cloud_init_user              = var.cloud_init_user
   cloud_init_ssh_keys          = var.ssh_keys
@@ -89,7 +91,7 @@ module "control_plane" {
 }
 
 module "workers" {
-  source = "git::https://github.com/n2solutionsio/terraform-proxmox-vm.git?ref=v0.3.0"
+  source = "git::https://github.com/n2solutionsio/terraform-proxmox-vm.git?ref=v0.4.0"
   count  = var.worker_count
 
   node_name      = var.node_name
@@ -102,6 +104,8 @@ module "workers" {
   import_from    = proxmox_virtual_environment_download_file.cloud_image.id
   vlan_id        = var.vlan_id
   network_bridge = var.network_bridge
+
+  qemu_agent_enabled = var.qemu_agent_enabled
 
   cloud_init_enabled           = true
   cloud_init_user              = var.cloud_init_user

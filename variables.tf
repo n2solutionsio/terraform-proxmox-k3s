@@ -119,6 +119,12 @@ variable "cloud_init_user" {
   default     = "ubuntu"
 }
 
+variable "qemu_agent_enabled" {
+  description = "Enable the QEMU guest agent on all nodes. The qemu-guest-agent package is installed via cloud-init; this toggles the Proxmox-side agent block (a power-cycle is required for the virtio channel to attach)."
+  type        = bool
+  default     = true
+}
+
 variable "snippet_storage" {
   description = "Proxmox storage for cloud-init snippets"
   type        = string
