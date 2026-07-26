@@ -44,6 +44,14 @@ resource "proxmox_virtual_environment_file" "cloud_init_server" {
     })
     file_name = "${var.cluster_name}-k3s-server-${count.index}.yaml"
   }
+
+  # source_raw.data is write-only in the provider, so it perma-diffs and forces
+  # a destroy/recreate of this snippet on every apply (needing an SSH upload).
+  # Cloud-init only matters at first boot; freeze it so routine applies don't
+  # churn it. To intentionally roll cloud-init, taint this resource.
+  lifecycle {
+    ignore_changes = [source_raw]
+  }
 }
 
 resource "proxmox_virtual_environment_file" "cloud_init_agent" {
@@ -68,10 +76,18 @@ resource "proxmox_virtual_environment_file" "cloud_init_agent" {
     })
     file_name = "${var.cluster_name}-k3s-agent-${count.index}.yaml"
   }
+
+  # source_raw.data is write-only in the provider, so it perma-diffs and forces
+  # a destroy/recreate of this snippet on every apply (needing an SSH upload).
+  # Cloud-init only matters at first boot; freeze it so routine applies don't
+  # churn it. To intentionally roll cloud-init, taint this resource.
+  lifecycle {
+    ignore_changes = [source_raw]
+  }
 }
 
 module "control_plane" {
-  source = "git::https://github.com/n2solutionsio/terraform-proxmox-vm.git?ref=v0.3.1"
+  source = "git::https://github.com/n2solutionsio/terraform-proxmox-vm.git?ref=v0.3.2"
   count  = var.control_plane_count
 
   node_name      = var.node_name
@@ -95,7 +111,7 @@ module "control_plane" {
 }
 
 module "workers" {
-  source = "git::https://github.com/n2solutionsio/terraform-proxmox-vm.git?ref=v0.3.1"
+  source = "git::https://github.com/n2solutionsio/terraform-proxmox-vm.git?ref=v0.3.2"
   count  = var.worker_count
 
   node_name      = var.node_name
