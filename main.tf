@@ -12,6 +12,12 @@ resource "proxmox_virtual_environment_download_file" "cloud_image" {
   url                 = var.cloud_image_url
   file_name           = var.cloud_image_file_name
   overwrite_unmanaged = true
+
+  # Do not re-download / replace the image when the upstream file's size or
+  # checksum changes (Ubuntu re-publishes the same-named cloud image). Without
+  # this, a republished image forces replacement of this resource, which
+  # cascades into disk.import_from and rebuilds every VM.
+  overwrite = false
 }
 
 resource "proxmox_virtual_environment_file" "cloud_init_server" {
@@ -65,7 +71,7 @@ resource "proxmox_virtual_environment_file" "cloud_init_agent" {
 }
 
 module "control_plane" {
-  source = "git::https://github.com/n2solutionsio/terraform-proxmox-vm.git?ref=v0.3.0"
+  source = "git::https://github.com/n2solutionsio/terraform-proxmox-vm.git?ref=v0.3.1"
   count  = var.control_plane_count
 
   node_name      = var.node_name
@@ -89,7 +95,7 @@ module "control_plane" {
 }
 
 module "workers" {
-  source = "git::https://github.com/n2solutionsio/terraform-proxmox-vm.git?ref=v0.3.0"
+  source = "git::https://github.com/n2solutionsio/terraform-proxmox-vm.git?ref=v0.3.1"
   count  = var.worker_count
 
   node_name      = var.node_name
